@@ -39,7 +39,6 @@ public class KeyBoardActivity extends AppCompatActivity {
         emotionTv = findViewById(R.id.act_keyboard_emotion_tv);
         emotionLayout = findViewById(R.id.emotion_layout);
 
-        showKeyboard();
 
         editText = findViewById(R.id.act_keyboard_send_edit);
         editText.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
@@ -76,8 +75,9 @@ public class KeyBoardActivity extends AppCompatActivity {
                             public void run() {
                                 showEmotionLayout();
                                 hideKeyboard();
+                                editText.clearFocus();
                             }
-                        }, 500);
+                        }, 100);
                     }
                 } else if (type == TYPE_SHOW_KEYBOARD) {
                     showEmotionLayout();
@@ -88,6 +88,14 @@ public class KeyBoardActivity extends AppCompatActivity {
                 }
             }
         });
+        editText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    hideEmotionLayout();
+                }
+            }
+        });
         editText.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -95,10 +103,16 @@ public class KeyBoardActivity extends AppCompatActivity {
                 return false;
             }
         });
+
     }
 
     private void showEmotionLayout() {
         emotionLayout.getLayoutParams().height = keyboardHeight;
+        if (getSupportSoftInputHeight(KeyBoardActivity.this) > 200) {
+            return;
+        }
+        emotionLayout.requestLayout();
+        type = TYPE_SHOW_EMOTION;
     }
 
     private void hideEmotionLayout() {
@@ -165,13 +179,13 @@ public class KeyBoardActivity extends AppCompatActivity {
 
 
     private void showKeyboard() {
+        editText.requestFocus();
         InputMethodManager manager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         if (manager != null) manager.showSoftInput(editText, 0);
     }
 
     private void hideKeyboard() {
         InputMethodManager manager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        ;
         if (manager != null)
             manager.hideSoftInputFromWindow(editText.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
     }
